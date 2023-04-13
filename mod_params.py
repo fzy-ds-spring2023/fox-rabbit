@@ -1,5 +1,9 @@
 """
     Add argument parsing to fox-rabbit.py
+    NOTES: modify this code to do #3 for fox-rabbit.py
+    + modify the fox-rabbit.py code to use argparse
+        for the params in ALLCAPS at the top of the file
+        (e.g., RABBITS, FOXES, etc.)
 """
 
 import argparse

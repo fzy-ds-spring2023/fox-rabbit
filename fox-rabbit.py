@@ -12,12 +12,18 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 import copy
+import seaborn as sns
 from cmap import pp_map, norm
 from collections import defaultdict
 
 SIZE = 200  # The dimensions of the field
-GRASS_RATE = 0.025 # Probability that grass grows back at any location in the next season.
+GRASS_RATE = 0.05 # Probability that grass grows back at any location in the next season.
 WRAP = False # Does the field wrap around on itself when rabbits move?
+RABBITS = 100 # Initial number of rabbits
+FOXES = 50 # Initial number of foxes
+FOX_HUNGER = 10 # Number of days a fox can go without eating before dying
+FOX_SPEED = 2 # How fast a fox can move
+SIM_LENGTH = 1000 # Number of days to simulate
 
 def flatten(l):
     """ flatten a list of lists """
@@ -156,29 +162,29 @@ class Field:
         plt.xlabel("generation #")
         plt.ylabel("% population/grass coverage")
         
-        # get generations and toal number of animals
-        generations = list(range(len(self.ngrass)))
-        totals = list(np.sum(np.array(list(self.nanimals.values())), axis=0))
+        # get generations and grass coverage
+        xg = list(range(len(self.ngrass)))
         grass_cov = [grass/(SIZE**2) for grass in self.ngrass[:]]
         
         # build the percentage of each animal
         for aid in self.nanimals.keys():
-            ys = np.array(self.nanimals[aid])/totals
-            plt.plot(generations, ys, marker=marker, label=labels[aid])
-
-        plt.plot(generations, grass_cov, marker=marker, label=labels[1])
-
+            max_a = max(self.nanimals[aid])
+            ys = np.array(self.nanimals[aid])/max_a
+            plt.plot(xg, ys, marker=marker, label=labels[aid])
+            
+        plt.plot(xg, grass_cov, marker=marker, label=labels[1])
+        
         plt.grid()
-
-        plt.title("Populations over Time: GROW_RATE =" + str(GRASS_RATE))
-        plt.savefig("plots/history.png", bbox_inches='tight')
+        plt.title("Populations over Time: GROW_RATE = " + str(GRASS_RATE))
+        plt.savefig(f"plots/history{FOXES}:{FOX_HUNGER}-{RABBITS}.png", bbox_inches='tight')
         plt.legend()
+        sns.set()
         plt.show()
 
 
 def animate(i, field, im):
-    # break after 1000 generations
-    if i > 1000:
+    # break after SIM_LENGTH generations
+    if i > SIM_LENGTH:
         return
     field.generation()
     
@@ -196,12 +202,12 @@ def main():
     field = Field()
     
     # rabbit grass eater
-    for _ in range(100):
+    for _ in range(RABBITS):
         field.add_animal(Animal(2, max_offspring=2, speed=1, starve=0, eats=[1]))
         
     # fox rabbit eater
-    for _ in range(50):
-        field.add_animal(Animal(3, max_offspring=1, speed=2, starve=20, eats=[2]))
+    for _ in range(FOXES):
+        field.add_animal(Animal(3, max_offspring=1, speed=FOX_SPEED, starve=FOX_HUNGER, eats=[2]))
     
     # Plot the ecosystem
     array = np.ones(shape=(SIZE, SIZE), dtype=int)
