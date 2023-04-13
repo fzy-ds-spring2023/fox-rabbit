@@ -1,5 +1,8 @@
-import argparse
+"""
+    Add argument parsing to fox-rabbit.py
+"""
 
+import argparse
 
 def main():
     parser = argparse.ArgumentParser()
