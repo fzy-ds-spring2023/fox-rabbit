@@ -15,6 +15,7 @@ import copy
 import seaborn as sns
 from cmap import pp_map, norm
 from collections import defaultdict
+import argparse
 
 SIZE = 200  # The dimensions of the field
 GRASS_RATE = 0.05 # Probability that grass grows back at any location in the next season.
@@ -24,6 +25,33 @@ FOXES = 50 # Initial number of foxes
 FOX_HUNGER = 10 # Number of days a fox can go without eating before dying
 FOX_SPEED = 2 # How fast a fox can move
 SIM_LENGTH = 1000 # Number of days to simulate
+
+def new_params():
+    """ Set arguments from command line """
+    
+    # User defined command-line arguments
+    parser = argparse.ArgumentParser(description='Command line arguments to test fox-rabbit.py')
+
+    parser.add_argument('-g', '--grass_rate', default=0.05, help='Input grass growth rate')
+    parser.add_argument('-k', '--fox_k_value', default=10, help='Input k cycle that foxes can go without food')
+    parser.add_argument('-fs', '--field_size', default=200, help='Input field dimension')
+    parser.add_argument('-f', '--num_foxes', default=50, help='Input number of foxes')
+    parser.add_argument('-r', '--num_rabbits', default=100, help='Input number of rabbits')
+    parser.add_argument('-fm', '--fox_move', default=2, help='Input movement foxes can take each cycle')
+    parser.add_argument('-sim', '--sim_length', default=1000, help='Input number of generations to simulate')
+    parser.add_argument('-w', '--wrapped', default=False, help='Input whether field is wrapped or not')
+    
+    # set global variables
+    global GRASS_RATE, FOXES, FOX_HUNGER, FOX_SPEED, RABBITS, SIM_LENGTH, SIZE, WRAP
+    args = parser.parse_args()
+    GRASS_RATE = float(args.grass_rate)
+    FOXES = int(args.num_foxes)
+    FOX_HUNGER = int(args.fox_k_value)
+    FOX_SPEED = int(args.fox_move)
+    RABBITS = int(args.num_rabbits)
+    SIM_LENGTH = int(args.sim_length)
+    SIZE = int(args.field_size)
+    WRAP = bool(args.wrapped)
 
 def flatten(l):
     """ flatten a list of lists """
@@ -47,7 +75,7 @@ class Animal:
         """ Make a new rabbit at the same location.
          Reproduction is hard work! Each reproducing
          rabbit's eaten level is reset to zero. """
-        
+
         born = []
         if self.eaten == 1:
             self.eaten = 0
@@ -125,7 +153,7 @@ class Field:
                 born += animal.reproduce()
             self.animals[aid] += born
             self.nanimals[aid].append(self.num_animals(aid))
-    
+
         self.ngrass.append(self.amount_of_grass())
 
     def grow(self):
@@ -139,7 +167,7 @@ class Field:
         for a in self.animals[aid]:
             animal[a.x, a.y] = aid
         return animal
-    
+
     def num_animals(self, aid):
         """ How many rabbits are there in the field ? """
         return len(self.animals[aid])
@@ -156,24 +184,24 @@ class Field:
         self.grow()
 
     def history(self, labels, marker='.'):
-        """ Plot the history of the field 
+        """ Plot the history of the field
             A time-series of the population """
         plt.figure(figsize=(12,6))
         plt.xlabel("generation #")
         plt.ylabel("% population/grass coverage")
-        
+
         # get generations and grass coverage
         xg = list(range(len(self.ngrass)))
         grass_cov = [grass/(SIZE**2) for grass in self.ngrass[:]]
-        
+
         # build the percentage of each animal
         for aid in self.nanimals.keys():
             max_a = max(self.nanimals[aid])
             ys = np.array(self.nanimals[aid])/max_a
             plt.plot(xg, ys, marker=marker, label=labels[aid])
-            
+
         plt.plot(xg, grass_cov, marker=marker, label=labels[1])
-        
+
         plt.grid()
         plt.title("Populations over Time: GROW_RATE = " + str(GRASS_RATE))
         plt.savefig(f"plots/history{FOXES}:{FOX_HUNGER}-{RABBITS}.png", bbox_inches='tight')
@@ -187,7 +215,7 @@ def animate(i, field, im):
     if i > SIM_LENGTH:
         return
     field.generation()
-    
+
     # get the highest value of the field and animals (for plotting)
     arr = [field.field]
     arr += [field.get_animal(aid) for aid in field.animals.keys()]
@@ -195,20 +223,22 @@ def animate(i, field, im):
     plt.title("generation = " + str(i))
     return im,
 
-
 def main():
-
+    
+    # Set the parameters
+    new_params()
+    
     # Create the ecosystem
     field = Field()
-    
+
     # rabbit grass eater
     for _ in range(RABBITS):
         field.add_animal(Animal(2, max_offspring=2, speed=1, starve=0, eats=[1]))
-        
+
     # fox rabbit eater
     for _ in range(FOXES):
         field.add_animal(Animal(3, max_offspring=1, speed=FOX_SPEED, starve=FOX_HUNGER, eats=[2]))
-    
+
     # Plot the ecosystem
     array = np.ones(shape=(SIZE, SIZE), dtype=int)
     fig = plt.figure(figsize=(5,5))
@@ -222,7 +252,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 
 
