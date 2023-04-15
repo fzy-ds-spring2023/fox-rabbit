@@ -203,8 +203,9 @@ class Field:
         plt.plot(xg, grass_cov, marker=marker, label=labels[1])
 
         plt.grid()
-        plt.title("Populations over Time: GROW_RATE = " + str(GRASS_RATE))
-        plt.savefig(f"plots/history{FOXES}:{FOX_HUNGER}-{RABBITS}.png", bbox_inches='tight')
+        plt.suptitle("Populations over Time", fontweight='bold', fontsize=16, x=0.125, y=.97, ha="left")
+        plt.title(f"foxes: {FOXES}, fox k-value: {FOX_HUNGER}, fox movement: {FOX_SPEED}, rabbits: {RABBITS}, size: {SIZE}, grass: {GRASS_RATE}", fontsize=14, pad=10, loc="left")
+        plt.savefig(f"plots/{FOXES}{FOX_HUNGER}{FOX_SPEED}{RABBITS}{SIZE}{GRASS_RATE}.png", bbox_inches='tight')
         plt.legend()
         sns.set()
         plt.show()
