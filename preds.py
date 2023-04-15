@@ -32,8 +32,8 @@ def new_params():
     # User defined command-line arguments
     parser = argparse.ArgumentParser(description='Command line arguments to test fox-rabbit.py')
 
-    parser.add_argument('-g', '--grass_rate', default=0.05, help='Input grass growth rate')
-    parser.add_argument('-k', '--fox_k_value', default=10, help='Input k cycle that foxes can go without food')
+    parser.add_argument('-g', '--grass_rate', default=0.075, help='Input grass growth rate')
+    parser.add_argument('-k', '--fox_k_value', default=30, help='Input k cycle that foxes can go without food')
     parser.add_argument('-fs', '--field_size', default=200, help='Input field dimension')
     parser.add_argument('-f', '--num_foxes', default=50, help='Input number of foxes')
     parser.add_argument('-r', '--num_rabbits', default=100, help='Input number of rabbits')
